@@ -1,0 +1,67 @@
+# Can a Music Database Talk Back? Building the TurnTable Chat Experiment
+
+## Introduction
+
+At TurnTable Charts, we’ve spent the last five years collecting rich and granular data on the Nigerian music scene. From weekly rankings to artist trajectories across radio, streaming, and digital platforms, our database has grown into a comprehensive source of truth on music in Nigeria. But until recently, this treasure trove of information was accessible only through dashboards, SQL queries, and internal reports.
+
+Then came a question we couldn’t shake: what if you could just talk to the data?
+
+That question sparked the TurnTable Chat experiment. The idea was simple in theory—build a conversational interface on top of our existing database so users could ask natural language questions and get accurate, data-backed answers. Think of it as an AI research assistant, but focused entirely on Nigerian music charts.
+
+## Background
+
+For a while, we had been thinking about how to bring fans closer to the data. Fans often have burning questions to support their theories, counter arguments, or validate trends, and we wanted to give them a direct line to the data that powers TurnTable Charts. What if they could explore the same information we use internally, but in a conversational way?
+
+## Goals
+
+We didn’t want to over-engineer it. The core goal was to answer user questions in a natural, human-readable format. If someone asked a question outside our data's timeframe (we started collecting in July 2020), the system should explain that gracefully. We also set some operational targets: handle up to 1,000 users monthly, support 100 concurrent sessions, and implement a rate limit of 10 questions per hour per user.
+
+## Design
+
+We opted for a lightweight architecture. A React frontend hosted on a TurnTable subdomain (`chat.turntablecharts.com`) would collect user questions. These would be forwarded to a Flask backend, which would handle the natural language processing using large language models. That model would convert natural language to SQL, run the query on our existing database, and turn the result into a human-readable response before sending it back.
+
+## Process Flow
+
+Here’s how it works:
+
+1. A user asks a question on the frontend.  
+2. The question is sent to the backend over a REST API.  
+3. The backend uses an LLM to convert the question to a SQL query.  
+4. The SQL is executed on our music chart database.  
+5. The result is sent back to the LLM to be reformatted into a natural language answer.  
+6. The final answer is sent to the frontend and displayed to the user.
+
+## Engineering Considerations
+
+This pipeline brought its own set of engineering challenges. Microsoft SQL Server doesn’t support certain common SQL idioms like `LIMIT`, `STRFTIME`, or using `SUBSTRING` on `datetime2` fields. We had to adjust the model prompts to avoid generating invalid SQL. We also had to clarify vague inputs like "current chart," which we interpret as the entry with the most recent `datecreated`.
+
+Grouping and counting entries posed another challenge. For instance, when a user asks how many No. 1 songs an artist has, we had to make sure duplicates of the same title weren’t double-counted.
+
+## Performance Estimates
+
+To prepare for scale, we did some back-of-the-envelope calculations. Assuming 100 concurrent users sending 10 questions an hour, we estimated a peak of 16.67 queries per second. At 5KB per request/response pair, we were looking at around 83KB/sec in data throughput.
+
+Inference took about 500ms per query, which meant we'd need a CPU setup capable of handling roughly 8.34 seconds of processing time per real-time second. RAM estimates landed in the 16–32GB range for running LLMs comfortably.
+
+## User Experience
+
+We also thought about edge cases. What happens when a user queries beyond our available dates? What if someone spams the bot? We implemented gentle, clear responses for the former and set up hourly query limits for the latter.
+
+And the questions? They were fascinating. Some were straightforward: _"How many No. 1 hits does Asake have?"_ Others were niche: _"Who held the No. 3 spot the longest in 2021?"_ The model didn't need to get everything perfect, but it needed to be consistent, accurate, and transparent.
+
+## Conclusion
+
+At its core, TurnTable Chat is still an experiment. It’s a minimal, live system built to test a simple hypothesis: can a music database talk back? And if it can, how useful does that conversation become?
+
+We’re thinking about ways to extend it—maybe by adding support for genre-specific queries or giving industry professionals special tools to explore chart data. But for now, it lives quietly at [chat.turntablecharts.com](https://chat.turntablecharts.com), answering questions and learning from every one of them.
+
+For those working on similar systems—conversational interfaces over structured datasets—we’d love to compare notes. Like all good startup ideas, this began with a curiosity. And as engineers, that’s always the best place to start.
+
+## Next Steps
+
+From here, our focus is on refining accuracy and reliability. We’re planning more extensive prompt engineering to guide SQL generation, implementing deeper analytics to track usage patterns, and experimenting with caching strategies to speed up repeated queries.
+
+We're also looking into releasing an API version for internal teams and maybe even a public beta. If user interest keeps growing, we may invest in scaling infrastructure and tightening up NLP tuning for even better question interpretation.
+
+Stay tuned—this is just version one.
+
