@@ -73,6 +73,12 @@ export const BLOG_POSTS: BlogPost[] = [
     link: '/blog/Can-a-Music-Database-Talk-Back-Building-the-TurnTable-chat-xperiment',
     uid: 'blog-1',
   },
+  {
+    title: 'Building Standup Magic: A Peek Behind the Curtain',
+    description: 'We\'re building a platform to streamline project management, focusing on automated stand-up notifications',
+    link: '/blog/Behind-the-scene-BuildingDoTellBoard',
+    uid: 'blog-2',
+  },
 ]
 
 export const SOCIAL_LINKS: SocialLink[] = [
