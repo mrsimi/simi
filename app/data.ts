@@ -29,13 +29,22 @@ type SocialLink = {
 
 export const PROJECTS: Project[] = [
   {
+    name: 'Silobase (A OSS Backend-as-a-Service)',
+    description:
+      'A minimal Backend-as-a-Service layer that exposes your database over a RESTful HTTP API — with no backend code.',
+    link: 'https://silobase.vercel.app/',
+    video:
+      '',
+    id: 'project1',
+  },
+  {
     name: 'Style Transfer App (half-done)',
     description:
       'Take the style in one photo and apply it to another photo using mathematics',
     link: 'https://pro.motion-primitives.com/',
     video:
       'https://res.cloudinary.com/dugsqtdzy/video/upload/v1743235552/Screen_Recording_2025-03-29_at_09.00.39_ln8r64.mov',
-    id: 'project1',
+    id: 'project2',
   }
 ]
 
@@ -72,6 +81,12 @@ export const BLOG_POSTS: BlogPost[] = [
     description: 'Building a ai chat for Nigeria\'s foremost music data chart company',
     link: '/blog/Can-a-Music-Database-Talk-Back-Building-the-TurnTable-chat-xperiment',
     uid: 'blog-1',
+  },
+  {
+    title: 'Building Silobase: A Backend-as-a-Service for Your Own Infrastructure',
+    description: 'I was working on a project that needed an internal dashboard.',
+    link: '/blog/Building-Silobase-An-OSS',
+    uid: 'blog-3',
   },
   {
     title: 'Building Standup Magic: A Peek Behind the Curtain',

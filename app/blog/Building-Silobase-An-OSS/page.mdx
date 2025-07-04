@@ -1,0 +1,161 @@
+# Building Silobase: A Backend-as-a-Service for Your Own Infrastructure
+
+## Background
+
+I was working on a project that needed an internal dashboard. The frontend would be written in React, and the only backend requirement was to read from a database to generate some charts. No business logic, no authentication layer, no orchestration — just a clean API to interact with my existing data.
+
+At first, Supabase and Firebase seemed like great fits. Both are feature-rich Backend-as-a-Service platforms that abstract away infrastructure. But both had a critical limitation:
+
+> **I couldn’t bring my own database.**
+
+Supabase locks you into a managed PostgreSQL instance. Firebase forces you to use Firestore or Realtime Database. My setup already had a SQL database running — I just needed a way to expose it via HTTP, without spinning up a custom Express server or writing boilerplate code.
+
+That was the moment I decided to build **Silobase** — an open-source BaaS that doesn’t pick your infrastructure for you.
+
+
+## Goals
+
+Silobase was built around a few core principles:
+
+- ✅ **Bring your own infrastructure**  
+  Use existing PostgreSQL, MSSQL, or other SQL databases.
+
+- ✅ **Zero backend code**  
+  Don’t write APIs manually — configure everything via `.env`.
+
+- ✅ **Frontend-first developer experience**  
+  Build your UI however you want — React, Vue, or even raw HTML.
+
+- ✅ **Fast, minimal setup**  
+  Plug in your config and deploy it anywhere in minutes.
+
+- ✅ **Self-hosted and open-source**  
+  No vendor lock-in or opaque services.
+
+
+## What Is Silobase?
+
+Silobase is a minimal Backend-as-a-Service layer that exposes your database (and soon file storage, queues, and more) over a RESTful HTTP API — with no backend code.
+
+It connects to your infrastructure using a simple `.env` configuration and translates HTTP requests into SQL operations. You can use it to instantly read and write data from any frontend without building or maintaining a backend.
+
+## Key Features
+
+- 🔌 **Bring your own database**: PostgreSQL and MSSQL supported now. MySQL and SQLite support coming soon.
+- 🌐 **Instant REST API**: CRUD over HTTP for any table in your database.
+- ⚙️ **Zero-code configuration**: Controlled entirely by environment variables.
+- 🗂 **Pluggable file storage** (coming soon): Support for AWS S3, Azure Blob, and more.
+- 📬 **Extensible service layer** (planned): Email, queues, and caching via connectors.
+
+## Architecture
+
+Silobase is a lightweight HTTP server that acts as a proxy layer between your frontend and infrastructure. The stack uses **Fastify** for HTTP handling and **Knex.js** as the SQL query builder.
+
+### Component Overview
+
+```text
+[ Client Application ]
+          │
+          ▼
+   HTTP Request
+          │
++------------------------+
+|     Silobase API       |
+|------------------------|
+| • REST Handler         |
+| • Config Loader        |
+| • DB Connector         |
+| • File Gateway (soon)  |
++------------------------+
+          │
+          ▼
+[ PostgreSQL / MSSQL / etc. ]
+````
+
+* **REST Handler**: Maps HTTP verbs (GET, POST, PUT, DELETE) to CRUD operations.
+* **DB Connector**: Connects via Knex.js using `.env` settings.
+* **Config Loader**: Parses environment variables to set up routes and permissions.
+* **File Gateway**: A planned module to route file upload/download operations to cloud storage providers.
+
+## API Design
+
+Silobase follows standard REST semantics. Each table becomes a RESTful endpoint:
+
+```
+GET    /api/:table          → SELECT * FROM table
+GET    /api/:table/:id      → SELECT * FROM table WHERE id = :id
+POST   /api/:table          → INSERT INTO table ...
+PUT    /api/:table/:id      → UPDATE table SET ... WHERE id = :id
+DELETE /api/:table/:id      → DELETE FROM table WHERE id = :id
+```
+
+Requests are automatically mapped to SQL queries with support for filters, pagination, and sorting.
+
+## Configuration
+
+Everything is managed through environment variables — no need to write code or generate schemas.
+
+Example `.env` file:
+
+```env
+SILOBASE_DB_CLIENT=pg
+SILOBASE_DB_HOST=localhost
+SILOBASE_DB_PORT=5432
+SILOBASE_DB_USER=admin
+SILOBASE_DB_PASSWORD=secret
+SILOBASE_DB_NAME=my_database
+
+# Optional future extensions
+SILOBASE_FILE_PROVIDER=aws
+SILOBASE_FILE_BUCKET=my-bucket
+```
+
+Once deployed, you can start making HTTP requests to access your data.
+
+Silobase is ideal when you already have infrastructure in place and just want to expose it cleanly. It’s not trying to be a full developer platform — it’s a simple connector between your stack and your UI.
+
+
+### 🚀 Roadmap
+
+#### ✅ Currently Supported
+
+* **Database:** PostgreSQL, MSSQL
+
+#### 🔜 Coming Soon
+
+* **Database:** MySQL, SQLite
+* **File Storage:** AWS S3, Azure Blob Storage
+* **Email:** SMTP, Mailgun, SendGrid
+* **Queues:** Redis, SQS (planned)
+
+
+
+
+## Deployment
+
+Silobase is designed for easy self-hosting. You can deploy it on:
+
+* [Render](https://render.com/)
+* [AWS ECS / Fargate](https://aws.amazon.com/fargate/)
+* [Azure App Service](https://azure.microsoft.com/)
+
+Each deployment only requires a `.env` file and a Docker container or Node.js runtime.
+
+[View deployment docs →](https://docs.silobase.dev)
+
+## Try It
+
+Silobase is available on GitHub: [github.com/your-org/silobase](https://github.com/your-org/silobase)
+
+Star it, fork it, open an issue, or send a PR. Contributions are welcome — especially around adapters and third-party provider support.
+
+## Final Thoughts
+
+Silobase isn’t a full-fledged platform. It’s a minimal interface layer that gives you freedom over your infrastructure without writing backend logic. It’s for developers who:
+
+* Already have a database
+* Want a fast way to expose data
+* Prefer building custom UIs
+* Need to avoid vendor lock-in
+
+If that sounds like you, give Silobase a shot and let me know what you think.
